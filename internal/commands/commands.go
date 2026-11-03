@@ -26,7 +26,7 @@ var noneCommand = Command{
 
 var (
 	Commands = []Command{
-		{name: "list", Run: listBooks, description: "list books on shelf"},
+		{name: "list", Run: listBooks, description: "list books on shelf and downloads left"},
 		{name: "download", args: "id ...", Run: downloadBooks, description: "download book(s) with given id(s)"},
 		{name: "version", Run: printVersion, description: "print version of script"},
 	}
@@ -60,9 +60,10 @@ func findCommand(name string) (Command, bool) {
 }
 
 var (
-	BookLister        usecase.BookLister
-	BookListPresenter service.BookListPresenter
-	BookDownloader    usecase.BookDownloader
+	BookLister          usecase.BookLister
+	BookListPresenter   service.BookListPresenter
+	BookDownloader      usecase.BookDownloader
+	DownloadLimitGetter usecase.DownloadLimitGetter
 )
 
 func listBooks() error {
@@ -70,7 +71,11 @@ func listBooks() error {
 	if err != nil {
 		return err
 	}
-	BookListPresenter.Present(bookList)
+	downloadLimit, err := DownloadLimitGetter.GetDownloadLimit()
+	if err != nil {
+		return err
+	}
+	BookListPresenter.Present(bookList, downloadLimit)
 	return nil
 }
 

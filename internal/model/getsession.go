@@ -80,6 +80,16 @@ func (s *Session) Decode(r io.Reader) (int, error) {
 	})
 }
 
+// DownloadLimit is number of book downloads in current subscription period
+type DownloadLimit struct {
+	Left uint32
+	Max  uint32
+}
+
+func (s Session) DownloadLimit() DownloadLimit {
+	return DownloadLimit{Left: s.downloadsLeft, Max: s.maxDownloads}
+}
+
 func (s Session) Type() uint16 {
 	return 0x4002
 }

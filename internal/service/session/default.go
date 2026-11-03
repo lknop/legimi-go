@@ -9,6 +9,8 @@ import (
 type defaultSessionService struct {
 	accountService service.Account
 	client         api.Client
+	// last session received, reused for download limit
+	last *model.Session
 }
 
 func (ss defaultSessionService) GetSession() (string, error) {
@@ -19,5 +21,15 @@ func (ss defaultSessionService) GetSession() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	*ss.last = session
 	return session.Id, nil
+}
+
+func (ss defaultSessionService) GetDownloadLimit() (model.DownloadLimit, error) {
+	if ss.last.Id == "" {
+		if _, err := ss.GetSession(); err != nil {
+			return model.DownloadLimit{}, err
+		}
+	}
+	return ss.last.DownloadLimit(), nil
 }

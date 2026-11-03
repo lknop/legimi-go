@@ -67,6 +67,27 @@ All command line switches are optional.
     In debugging mode, selected information about exchanged requests and responses is printed to stderr.
     Currently, probably the most useful information is contained within session response.
 
+-   `--json`
+
+    Print list of books in JSON format, for use in scripts:
+
+    ```json
+    {
+      "downloadsLeft": 7,
+      "maxDownloads": 10,
+      "books": [
+        {
+          "id": 123456,
+          "title": "Title",
+          "author": "Author",
+          "downloaded": true
+        }
+      ]
+    }
+    ```
+
+    `downloaded` is `true` for books already sent to your Kindle before. Downloading them again does not use up downloads.
+
 > [!NOTE]
 > You can give switches with one (`-config`) or two dashes (`--config`).
 
@@ -76,7 +97,7 @@ Available commands are:
 
 -   `list`
 
-    List books currently on your Legimi shelf.
+    List books currently on your Legimi shelf and number of downloads left in subscription period.
 
 -   `download <id> ...`
 
@@ -126,7 +147,7 @@ Most error responses are not recognized / handled yet. This should improve in th
 Script is not intended to create account or register device unknown to the Legimi service. You should use official app for this.
 Device registration works, but may cause issues.
 
-If you want to know how many book downloads are left in subscription period, you can use `-debug` switch and look for `downloads left` information under `Session response` section.
+Number of book downloads left in subscription period is shown by `list` command.
 If you are trying to download more books than you limit, Legimi service will block downloads.
 
 ## Troubleshooting
