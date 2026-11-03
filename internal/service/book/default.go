@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/tp86/legimi-go/internal/api"
@@ -17,6 +18,7 @@ type defaultBookService struct {
 	sessionService    service.Session
 	client            api.Client
 	downloadPresenter service.DownloadPresenter
+	downloadDir       string
 }
 
 func (bs defaultBookService) ListBooks() ([]model.BookMetadata, error) {
@@ -119,7 +121,12 @@ var downloadRetryDelay = 2 * time.Second
 
 func (bs defaultBookService) download(book model.BookMetadata, downloadDetails model.BookDownloadDetails) error {
 	bs.downloadPresenter.Start(book)
-	fileName := fmt.Sprintf("%d.mobi", book.Id)
+	if bs.downloadDir != "" {
+		if err := os.MkdirAll(bs.downloadDir, 0755); err != nil {
+			return err
+		}
+	}
+	fileName := filepath.Join(bs.downloadDir, fmt.Sprintf("%d.mobi", book.Id))
 	// download to temporary file, so that incomplete download never looks like a book
 	partFileName := fileName + ".part"
 	file, err := os.Create(partFileName)

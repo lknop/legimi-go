@@ -16,7 +16,7 @@ func configure() {
 	accountService := as.DefaultService(accountRepository, apiClient, commands.Options)
 	sessionService := session.DefaultService(accountService, apiClient)
 	bookDownloadPresenter := presenter.DefaultBookDownloadPresenter()
-	bookService := book.DefaultService(sessionService, apiClient, bookDownloadPresenter)
+	bookService := book.DefaultService(sessionService, apiClient, bookDownloadPresenter, commands.Options)
 	commands.BookLister = bookService
 	commands.BookDownloader = bookService
 	commands.BookListPresenter = presenter.DefaultBookListPresenter()

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -107,6 +108,11 @@ func chdirToTempDir(t *testing.T) {
 
 func download(t *testing.T, handler http.Handler, size uint64) error {
 	t.Helper()
+	return downloadToDir(t, handler, size, "")
+}
+
+func downloadToDir(t *testing.T, handler http.Handler, size uint64, dir string) error {
+	t.Helper()
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
 
@@ -114,7 +120,7 @@ func download(t *testing.T, handler http.Handler, size uint64) error {
 	downloadRetryDelay = time.Millisecond
 	t.Cleanup(func() { downloadRetryDelay = oldDelay })
 
-	bs := defaultBookService{downloadPresenter: noopDownloadPresenter{}}
+	bs := defaultBookService{downloadPresenter: noopDownloadPresenter{}, downloadDir: dir}
 	done := make(chan error, 1)
 	go func() {
 		done <- bs.download(
@@ -357,4 +363,25 @@ func TestFailedDownloadKeepsExistingBook(t *testing.T) {
 		t.Errorf("existing book was overwritten with %q", content)
 	}
 	assertNoFile(t, bookFileName()+".part")
+}
+
+func TestDownloadToDirectory(t *testing.T) {
+	data := testData(testDataSize)
+	chdirToTempDir(t)
+	dir := filepath.Join("books", "new")
+
+	err := downloadToDir(t, rangeHandler(t, data), uint64(len(data)), dir)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	content, err := os.ReadFile(filepath.Join(dir, bookFileName()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(content, data) {
+		t.Errorf("downloaded file differs from served data")
+	}
+	assertNoFile(t, bookFileName())
+	assertNoFile(t, filepath.Join(dir, bookFileName()+".part"))
 }

@@ -61,6 +61,10 @@ All command line switches are optional.
     Same logic as for login applies.
     Note that login and password are stored in configuration file as plain text.
 
+-   `--dir path`
+
+    Directory where downloaded books are saved. Default is current working directory. Directory is created if it does not exist.
+
 -   `--debug`
 
     Enable debugging mode.
@@ -108,10 +112,10 @@ Legimi Kindle Id will be automatically queried and stored in configuration file 
     $ legimi-go download <book-id>
     ```
 
-    Downloaded book will be saved to `<book-id>.mobi` file in current working directory.
+    Downloaded book will be saved to `<book-id>.mobi` file in current working directory (or in directory given with `--dir`).
 
 > [!TIP]
-> You can `cd` into mounted Kindle's `documents` directory before downloading to avoid copying files.
+> You can download directly to mounted Kindle's `documents` directory (`--dir`) to avoid copying files.
 
 3.  Copy files to your Kindle's `documents` directory
 
@@ -158,4 +162,4 @@ See [Limitations](#limitations) for more missing features.
 - [ ] reuse session id if possible
 - [ ] parallel downloader
 - [x] handle occassional EOF while getting list of books
-- [ ] option to specify directory for downloaded books
+- [x] option to specify directory for downloaded books
