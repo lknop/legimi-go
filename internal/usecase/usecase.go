@@ -6,6 +6,10 @@ type BookLister interface {
 	ListBooks() ([]model.BookMetadata, error)
 }
 
+type DownloadLimitGetter interface {
+	GetDownloadLimit() (model.DownloadLimit, error)
+}
+
 type BookDownloader interface {
 	DownloadBooks([]uint64) error
 }

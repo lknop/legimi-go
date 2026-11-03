@@ -17,6 +17,7 @@ type options struct {
 	configurationFile string
 	debugging         bool
 	downloadDir       string
+	json              bool
 }
 
 var Options options
@@ -41,6 +42,10 @@ func (o options) GetDownloadDir() string {
 	return o.downloadDir
 }
 
+func (o options) IsJSON() bool {
+	return o.json
+}
+
 func configureFlags() {
 	flag.Usage = usage
 	flag.StringVar(&Options.configurationFile, "config", defaultConfigurationFile(), "path to configuration file")
@@ -48,6 +53,7 @@ func configureFlags() {
 	flag.StringVar(&Options.password, "password", "", "Legimi password")
 	flag.BoolVar(&Options.debugging, "debug", false, "print debugging information")
 	flag.StringVar(&Options.downloadDir, "dir", ".", "directory for downloaded books (created if missing)")
+	flag.BoolVar(&Options.json, "json", false, "print list of books in JSON format")
 }
 
 func flagPrint(what string) {
