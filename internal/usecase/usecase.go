@@ -13,3 +13,7 @@ type DownloadLimitGetter interface {
 type BookDownloader interface {
 	DownloadBooks([]uint64) error
 }
+
+type BookFileDownloader interface {
+	DownloadBookTo(id uint64, dir string) (string, error)
+}

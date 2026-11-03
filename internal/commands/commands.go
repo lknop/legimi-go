@@ -28,6 +28,7 @@ var (
 	Commands = []Command{
 		{name: "list", Run: listBooks, description: "list books on shelf and downloads left"},
 		{name: "download", args: "id ...", Run: downloadBooks, description: "download book(s) with given id(s)"},
+		{name: "sync", args: "[-refresh] [id ...]", Run: syncBooks, description: "download book(s) with given id(s) to connected Kindle as <id>.azw,\n\twith -refresh also download again books already on Kindle (renews their loan)"},
 		{name: "version", Run: printVersion, description: "print version of script"},
 	}
 )
@@ -80,20 +81,27 @@ func listBooks() error {
 }
 
 func downloadBooks() error {
-	ids := flag.Args()[1:]
-	if len(ids) == 0 {
+	bookIds, err := parseBookIds(flag.Args()[1:])
+	if err != nil {
+		return err
+	}
+	if len(bookIds) == 0 {
 		return fmt.Errorf("no book id provided")
 	}
+	return BookDownloader.DownloadBooks(bookIds)
+}
+
+func parseBookIds(ids []string) ([]uint64, error) {
 	bookIds := make([]uint64, len(ids))
 	for i, id := range ids {
 		v, err := strconv.ParseUint(id, 10, 64)
 		if err != nil {
 			err := err.(*strconv.NumError)
-			return fmt.Errorf("couldn't parse id '%s': %s", id, err.Err)
+			return nil, fmt.Errorf("couldn't parse id '%s': %s", id, err.Err)
 		}
 		bookIds[i] = v
 	}
-	return BookDownloader.DownloadBooks(bookIds)
+	return bookIds, nil
 }
 
 func printVersion() error {

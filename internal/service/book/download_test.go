@@ -120,13 +120,18 @@ func downloadToDir(t *testing.T, handler http.Handler, size uint64, dir string) 
 	downloadRetryDelay = time.Millisecond
 	t.Cleanup(func() { downloadRetryDelay = oldDelay })
 
-	bs := defaultBookService{downloadPresenter: noopDownloadPresenter{}, downloadDir: dir}
+	bs := defaultBookService{downloadPresenter: noopDownloadPresenter{}}
 	done := make(chan error, 1)
 	go func() {
-		done <- bs.download(
+		path, err := bs.download(
 			model.BookMetadata{Id: testBookId},
 			model.BookDownloadDetails{Url: server.URL + "/book.mobi", Size: size},
+			dir,
 		)
+		if err == nil && path != filepath.Join(dir, bookFileName()) {
+			err = fmt.Errorf("download returned path %q, expected %q", path, filepath.Join(dir, bookFileName()))
+		}
+		done <- err
 	}()
 	select {
 	case err := <-done:

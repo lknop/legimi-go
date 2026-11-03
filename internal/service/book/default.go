@@ -50,26 +50,28 @@ func (bs defaultBookService) DownloadBooks(bookIds []uint64) error {
 	// TODO concurrent download of all books
 	errs := make([]error, 0)
 	for _, id := range bookIds {
-		errs = append(errs, bs.downloadBook(id))
+		_, err := bs.DownloadBookTo(id, bs.downloadDir)
+		errs = append(errs, err)
 	}
 	return errors.Join(errs...)
 }
 
-func (bs defaultBookService) downloadBook(id uint64) error {
+// DownloadBookTo downloads book to given directory and returns path of downloaded file.
+func (bs defaultBookService) DownloadBookTo(id uint64, dir string) (string, error) {
 	// TODO concurrent downloader
 	sessionId, err := bs.sessionService.GetSession()
 	if err != nil {
-		return err
+		return "", err
 	}
 	book, err := bs.getBookMetadata(sessionId, id)
 	if err != nil {
-		return err
+		return "", err
 	}
 	bookDownloadDetails, err := bs.getBookDownloadDetails(sessionId, book)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return bs.download(book, bookDownloadDetails)
+	return bs.download(book, bookDownloadDetails, dir)
 }
 
 func (bs defaultBookService) getBookMetadata(sessionId string, bookId uint64) (model.BookMetadata, error) {
@@ -119,19 +121,19 @@ const (
 // variable, so that tests don't have to wait
 var downloadRetryDelay = 2 * time.Second
 
-func (bs defaultBookService) download(book model.BookMetadata, downloadDetails model.BookDownloadDetails) error {
+func (bs defaultBookService) download(book model.BookMetadata, downloadDetails model.BookDownloadDetails, dir string) (string, error) {
 	bs.downloadPresenter.Start(book)
-	if bs.downloadDir != "" {
-		if err := os.MkdirAll(bs.downloadDir, 0755); err != nil {
-			return err
+	if dir != "" {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return "", err
 		}
 	}
-	fileName := filepath.Join(bs.downloadDir, fmt.Sprintf("%d.mobi", book.Id))
+	fileName := filepath.Join(dir, fmt.Sprintf("%d.mobi", book.Id))
 	// download to temporary file, so that incomplete download never looks like a book
 	partFileName := fileName + ".part"
 	file, err := os.Create(partFileName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	err = bs.downloadTo(file, book, downloadDetails)
 	if closeErr := file.Close(); err == nil {
@@ -142,10 +144,10 @@ func (bs defaultBookService) download(book model.BookMetadata, downloadDetails m
 	}
 	if err != nil {
 		os.Remove(partFileName)
-		return err
+		return "", err
 	}
 	bs.downloadPresenter.End(book)
-	return nil
+	return fileName, nil
 }
 
 func (bs defaultBookService) downloadTo(file *os.File, book model.BookMetadata, downloadDetails model.BookDownloadDetails) error {

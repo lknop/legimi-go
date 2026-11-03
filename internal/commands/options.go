@@ -18,6 +18,7 @@ type options struct {
 	debugging         bool
 	downloadDir       string
 	json              bool
+	kindleDir         string
 }
 
 var Options options
@@ -54,6 +55,7 @@ func configureFlags() {
 	flag.BoolVar(&Options.debugging, "debug", false, "print debugging information")
 	flag.StringVar(&Options.downloadDir, "dir", ".", "directory for downloaded books (created if missing)")
 	flag.BoolVar(&Options.json, "json", false, "print list of books in JSON format")
+	flag.StringVar(&Options.kindleDir, "kindle", "", "folder where Kindle is mounted, for sync (found and mounted automatically if not given)")
 }
 
 func flagPrint(what string) {

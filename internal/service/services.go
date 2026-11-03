@@ -18,6 +18,7 @@ type Account interface {
 type Book interface {
 	usecase.BookLister
 	usecase.BookDownloader
+	usecase.BookFileDownloader
 }
 
 type BookListPresenter interface {

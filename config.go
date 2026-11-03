@@ -19,6 +19,7 @@ func configure() {
 	bookService := book.DefaultService(sessionService, apiClient, bookDownloadPresenter, commands.Options)
 	commands.BookLister = bookService
 	commands.BookDownloader = bookService
+	commands.BookFileDownloader = bookService
 	commands.DownloadLimitGetter = sessionService
 	if commands.Options.IsJSON() {
 		commands.BookListPresenter = presenter.JSONBookListPresenter()

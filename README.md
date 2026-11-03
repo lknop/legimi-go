@@ -65,6 +65,11 @@ All command line switches are optional.
 
     Directory where downloaded books are saved. Default is current working directory. Directory is created if it does not exist.
 
+-   `--kindle path`
+
+    Folder where Kindle is mounted, for `sync` command.
+    If not given, a Kindle connected by USB (in USB-drive mode) is found and, if needed, mounted with `udisksctl` (Linux only).
+
 -   `--debug`
 
     Enable debugging mode.
@@ -106,6 +111,17 @@ Available commands are:
 -   `download <id> ...`
 
     Download book(s) given their id(s). Book id can be obtained by listing books (first value in book entry line).
+
+-   `sync [-refresh] [<id> ...]`
+
+    Download book(s) given their id(s) straight to connected Kindle (see `--kindle`).
+    Books are saved as `documents/<id>.azw`, the name official Legimi app uses, so a new copy replaces the old one and keeps reading position.
+    Each book is written under temporary name and synced to disk before it is renamed, so a Kindle that drops off USB never has a half-written book.
+    A warning is printed and the command fails if the Kindle leaves USB-drive mode before all books are saved.
+
+    With `-refresh`, books already on the Kindle are downloaded again as well, which renews their loan.
+    Only books that Legimi lists as sent to this Kindle before are refreshed, so no download is used up for them.
+    Downloading new books stops before anything is downloaded if there are not enough downloads left.
 
 -   `version`
 
